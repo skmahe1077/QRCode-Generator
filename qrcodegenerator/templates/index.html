@@ -1,0 +1,521 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>QR Code Generator</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: linear-gradient(135deg, #1a0533, #4a1942, #6b2737, #2d1b4e);
+      min-height: 100vh;
+      color: #fff;
+    }
+
+    header {
+      text-align: center;
+      padding: 40px 20px 20px;
+    }
+
+    header h1 {
+      font-size: 2.4rem;
+      background: linear-gradient(90deg, #00d2ff, #3a7bd5);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    header p {
+      color: #aaa;
+      margin-top: 8px;
+      font-size: 1.05rem;
+    }
+
+    .container {
+      max-width: 960px;
+      margin: 0 auto;
+      padding: 20px;
+    }
+
+    /* Quick-pick buttons */
+    .platforms {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 14px;
+      justify-content: center;
+      margin-bottom: 30px;
+    }
+
+    .platform-btn {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 14px 24px;
+      border: 2px solid transparent;
+      border-radius: 14px;
+      cursor: pointer;
+      font-size: 1rem;
+      font-weight: 600;
+      color: #fff;
+      transition: transform 0.2s, box-shadow 0.2s;
+    }
+
+    .platform-btn:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 8px 25px rgba(0,0,0,0.4);
+    }
+
+    .platform-btn.active {
+      border-color: #fff;
+    }
+
+    .platform-btn svg { width: 24px; height: 24px; fill: #fff; }
+
+    .btn-linkedin  { background: #0A66C2; }
+    .btn-instagram { background: linear-gradient(45deg, #f09433, #e6683c, #dc2743, #cc2366, #bc1888); }
+    .btn-facebook  { background: #1877F2; }
+    .btn-github    { background: #333; }
+    .btn-medium    { background: #000; }
+    .btn-x         { background: #000; }
+    .btn-youtube   { background: #FF0000; }
+    .btn-custom    { background: linear-gradient(135deg, #667eea, #764ba2); }
+
+    /* Input area */
+    .input-section {
+      background: rgba(255,255,255,0.07);
+      backdrop-filter: blur(10px);
+      border-radius: 18px;
+      padding: 30px;
+      margin-bottom: 30px;
+    }
+
+    .input-section label {
+      display: block;
+      margin-bottom: 8px;
+      font-weight: 600;
+      font-size: 1.05rem;
+    }
+
+    .url-row {
+      display: flex;
+      gap: 0;
+    }
+
+    .url-row .generate-btn {
+      margin-left: 12px;
+    }
+
+    .url-prefix {
+      display: none;
+      align-items: center;
+      padding: 14px 0 14px 18px;
+      border-radius: 12px 0 0 12px;
+      border: 2px solid rgba(255,255,255,0.15);
+      border-right: none;
+      background: rgba(255,255,255,0.12);
+      color: #aaa;
+      font-size: 0.95rem;
+      white-space: nowrap;
+      user-select: none;
+    }
+
+    .url-row input {
+      flex: 1;
+      padding: 14px 18px;
+      border-radius: 12px;
+      border: 2px solid rgba(255,255,255,0.15);
+      background: rgba(255,255,255,0.08);
+      color: #fff;
+      font-size: 1rem;
+      outline: none;
+      transition: border-color 0.2s;
+    }
+
+    .url-row .url-prefix + input {
+      border-radius: 0 12px 12px 0;
+      border-left: none;
+    }
+
+    .url-row input::placeholder { color: #888; }
+    .url-row input:focus { border-color: #3a7bd5; }
+    .url-row .url-prefix:has(+ input:focus) { border-color: #3a7bd5; }
+
+    .generate-btn {
+      padding: 14px 32px;
+      background: linear-gradient(135deg, #00d2ff, #3a7bd5);
+      border: none;
+      border-radius: 12px;
+      color: #fff;
+      font-size: 1rem;
+      font-weight: 700;
+      cursor: pointer;
+      transition: opacity 0.2s;
+      white-space: nowrap;
+    }
+
+    .generate-btn:hover { opacity: 0.85; }
+
+    /* Result area */
+    .result {
+      display: none;
+      text-align: center;
+      background: rgba(255,255,255,0.07);
+      backdrop-filter: blur(10px);
+      border-radius: 18px;
+      padding: 36px;
+    }
+
+    .result h2 {
+      margin-bottom: 6px;
+      font-size: 1.3rem;
+    }
+
+    .result .url-display {
+      color: #aaa;
+      font-size: 0.9rem;
+      word-break: break-all;
+      margin-bottom: 24px;
+    }
+
+    /* QR wrapper with logo overlay */
+    .qr-wrapper {
+      display: inline-block;
+      position: relative;
+    }
+
+    #qrcode {
+      display: inline-block;
+      padding: 20px;
+      background: #fff;
+      border-radius: 16px;
+    }
+
+    #qrcode img, #qrcode canvas { display: block; }
+
+    .logo-overlay {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      width: 56px;
+      height: 56px;
+      background: #fff;
+      border-radius: 12px;
+      padding: 6px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+      display: none;
+    }
+
+    .logo-overlay img {
+      width: 100%;
+      height: 100%;
+      border-radius: 8px;
+      object-fit: contain;
+    }
+
+    .download-btn {
+      margin-top: 24px;
+      padding: 12px 28px;
+      background: linear-gradient(135deg, #11998e, #38ef7d);
+      border: none;
+      border-radius: 12px;
+      color: #fff;
+      font-size: 1rem;
+      font-weight: 700;
+      cursor: pointer;
+      transition: opacity 0.2s;
+    }
+
+    .download-btn:hover { opacity: 0.85; }
+
+    .hint {
+      margin-top: 14px;
+      color: #888;
+      font-size: 0.85rem;
+    }
+
+    footer {
+      text-align: center;
+      padding: 30px 20px;
+      color: #888;
+      font-size: 0.9rem;
+    }
+
+    footer a {
+      color: #3a7bd5;
+      text-decoration: none;
+      font-weight: 600;
+    }
+
+    footer a:hover {
+      text-decoration: underline;
+    }
+
+    @media (max-width: 600px) {
+      .url-row { flex-direction: column; }
+      header h1 { font-size: 1.7rem; }
+    }
+  </style>
+</head>
+<body>
+
+<header>
+  <h1>QR Code Generator</h1>
+  <p>Generate QR codes for your social profiles or any website</p>
+</header>
+
+<div class="container">
+
+  <!-- Platform quick-pick -->
+  <div class="platforms">
+    <button class="platform-btn btn-linkedin" onclick="selectPlatform('linkedin')">
+      <svg viewBox="0 0 24 24"><path d="M20.45 20.45h-3.56v-5.57c0-1.33-.02-3.04-1.85-3.04-1.85 0-2.14 1.45-2.14 2.94v5.67H9.34V9h3.41v1.56h.05a3.74 3.74 0 0 1 3.37-1.85c3.6 0 4.27 2.37 4.27 5.46v6.28zM5.34 7.43a2.07 2.07 0 1 1 0-4.14 2.07 2.07 0 0 1 0 4.14zM7.12 20.45H3.56V9h3.56v11.45zM22.22 0H1.77A1.75 1.75 0 0 0 0 1.73v20.54A1.75 1.75 0 0 0 1.77 24h20.45A1.76 1.76 0 0 0 24 22.27V1.73A1.76 1.76 0 0 0 22.22 0z"/></svg>
+      LinkedIn
+    </button>
+    <button class="platform-btn btn-instagram" onclick="selectPlatform('instagram')">
+      <svg viewBox="0 0 24 24"><path d="M12 2.16c3.2 0 3.58.01 4.85.07 1.17.05 1.97.25 2.43.41.61.24 1.05.52 1.51.98.46.46.74.9.98 1.51.17.46.36 1.26.41 2.43.06 1.27.07 1.65.07 4.85s-.01 3.58-.07 4.85c-.05 1.17-.25 1.97-.41 2.43a4.07 4.07 0 0 1-.98 1.51c-.46.46-.9.74-1.51.98-.46.17-1.26.36-2.43.41-1.27.06-1.65.07-4.85.07s-3.58-.01-4.85-.07c-1.17-.05-1.97-.25-2.43-.41a4.07 4.07 0 0 1-1.51-.98 4.07 4.07 0 0 1-.98-1.51c-.17-.46-.36-1.26-.41-2.43C2.17 15.58 2.16 15.2 2.16 12s.01-3.58.07-4.85c.05-1.17.25-1.97.41-2.43.24-.61.52-1.05.98-1.51.46-.46.9-.74 1.51-.98.46-.17 1.26-.36 2.43-.41C8.42 2.17 8.8 2.16 12 2.16M12 0C8.74 0 8.33.01 7.05.07 5.78.13 4.9.33 4.14.63a5.96 5.96 0 0 0-2.16 1.41A5.96 5.96 0 0 0 .57 4.2C.27 4.96.07 5.84.01 7.11.01 8.39 0 8.8 0 12.06s.01 3.67.07 4.95c.06 1.27.26 2.15.56 2.91.31.79.72 1.47 1.41 2.16a5.96 5.96 0 0 0 2.16 1.41c.76.3 1.64.5 2.91.56C8.39 24 8.8 24 12.06 24s3.67-.01 4.95-.07c1.27-.06 2.15-.26 2.91-.56a5.96 5.96 0 0 0 2.16-1.41 5.96 5.96 0 0 0 1.41-2.16c.3-.76.5-1.64.56-2.91.06-1.28.07-1.69.07-4.95s-.01-3.67-.07-4.95c-.06-1.27-.26-2.15-.56-2.91a5.96 5.96 0 0 0-1.41-2.16A5.96 5.96 0 0 0 19.91.57C19.15.27 18.27.07 17 .01 15.72.01 15.31 0 12.05 0H12zm0 5.84a6.16 6.16 0 1 0 0 12.32 6.16 6.16 0 0 0 0-12.32zM12 16a4 4 0 1 1 0-8 4 4 0 0 1 0 8zm7.85-10.4a1.44 1.44 0 1 0-2.88 0 1.44 1.44 0 0 0 2.88 0z"/></svg>
+      Instagram
+    </button>
+    <button class="platform-btn btn-facebook" onclick="selectPlatform('facebook')">
+      <svg viewBox="0 0 24 24"><path d="M24 12.07C24 5.41 18.63 0 12 0S0 5.41 0 12.07c0 6.02 4.39 11.01 10.13 11.93v-8.44H7.08v-3.49h3.04V9.41c0-3.02 1.79-4.69 4.53-4.69 1.31 0 2.68.24 2.68.24v2.97h-1.51c-1.49 0-1.95.93-1.95 1.89v2.26h3.33l-.53 3.49h-2.8v8.44C19.61 23.08 24 18.09 24 12.07z"/></svg>
+      Facebook
+    </button>
+    <button class="platform-btn btn-github" onclick="selectPlatform('github')">
+      <svg viewBox="0 0 24 24"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0 0 24 12c0-6.63-5.37-12-12-12z"/></svg>
+      GitHub
+    </button>
+    <button class="platform-btn btn-medium" onclick="selectPlatform('medium')">
+      <svg viewBox="0 0 24 24"><path d="M13.54 12a6.8 6.8 0 0 1-6.77 6.82A6.8 6.8 0 0 1 0 12a6.8 6.8 0 0 1 6.77-6.82A6.8 6.8 0 0 1 13.54 12zm7.42 0c0 3.54-1.51 6.42-3.38 6.42-1.87 0-3.39-2.88-3.39-6.42s1.52-6.42 3.39-6.42 3.38 2.88 3.38 6.42M24 12c0 3.17-.53 5.75-1.19 5.75-.66 0-1.19-2.58-1.19-5.75s.53-5.75 1.19-5.75C23.47 6.25 24 8.83 24 12z"/></svg>
+      Medium
+    </button>
+    <button class="platform-btn btn-x" onclick="selectPlatform('x')">
+      <svg viewBox="0 0 24 24"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
+      X
+    </button>
+    <button class="platform-btn btn-youtube" onclick="selectPlatform('youtube')">
+      <svg viewBox="0 0 24 24"><path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/></svg>
+      YouTube
+    </button>
+    <button class="platform-btn btn-custom" onclick="selectPlatform('custom')">
+      <svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 17.93c-3.95-.49-7-3.85-7-7.93 0-.62.08-1.21.21-1.79L9 15v1c0 1.1.9 2 2 2v1.93zm6.9-2.54c-.26-.81-1-1.39-1.9-1.39h-1v-3c0-.55-.45-1-1-1H8v-2h2c.55 0 1-.45 1-1V7h2c1.1 0 2-.9 2-2v-.41c2.93 1.19 5 4.06 5 7.41 0 2.08-.8 3.97-2.1 5.39z"/></svg>
+      Custom URL
+    </button>
+  </div>
+
+  <!-- URL input -->
+  <div class="input-section">
+    <label id="input-label">Enter your profile URL or any website link</label>
+    <div class="url-row">
+      <span class="url-prefix" id="urlPrefix"></span>
+      <input type="text" id="urlInput" placeholder="https://example.com" />
+      <button class="generate-btn" onclick="generateQR()">Generate QR</button>
+    </div>
+  </div>
+
+  <!-- QR result -->
+  <div class="result" id="resultSection">
+    <h2 id="resultTitle">Your QR Code</h2>
+    <p class="url-display" id="resultUrl"></p>
+    <div class="qr-wrapper">
+      <div id="qrcode"></div>
+      <div class="logo-overlay" id="logoOverlay">
+        <img id="logoImg" src="" alt="Logo" />
+      </div>
+    </div>
+    <br>
+    <button class="download-btn" onclick="downloadQR()">Download PNG</button>
+    <p class="hint">Scan this QR code with any phone camera to open the link</p>
+  </div>
+
+</div>
+
+<footer>
+  Built by <a href="https://github.com/skmahe1077" target="_blank" rel="noopener noreferrer">Mahendran Selvakumar</a>
+</footer>
+
+<script>
+  const platformConfig = {
+    linkedin:  { baseUrl: 'https://www.linkedin.com/in/', placeholder: 'yourprofile', label: 'Enter your LinkedIn username' },
+    instagram: { baseUrl: 'https://www.instagram.com/', placeholder: 'yourhandle', label: 'Enter your Instagram username' },
+    facebook:  { baseUrl: 'https://www.facebook.com/', placeholder: 'yourprofile', label: 'Enter your Facebook username' },
+    github:    { baseUrl: 'https://github.com/', placeholder: 'yourusername', label: 'Enter your GitHub username' },
+    medium:    { baseUrl: 'https://medium.com/@', placeholder: 'yourhandle', label: 'Enter your Medium username' },
+    x:         { baseUrl: 'https://x.com/', placeholder: 'yourhandle', label: 'Enter your X (Twitter) username' },
+    youtube:   { baseUrl: 'https://www.youtube.com/@', placeholder: 'yourchannel', label: 'Enter your YouTube channel name' },
+    custom:    { baseUrl: '', placeholder: 'https://example.com', label: 'Enter any website URL' }
+  };
+
+  let currentPlatform = 'custom';
+  let qrInstance = null;
+
+  function selectPlatform(platform) {
+    currentPlatform = platform;
+    const config = platformConfig[platform];
+    const input = document.getElementById('urlInput');
+    input.value = '';
+    input.placeholder = config.placeholder;
+    document.getElementById('input-label').textContent = config.label;
+    document.getElementById('urlPrefix').textContent = config.baseUrl;
+    document.getElementById('urlPrefix').style.display = config.baseUrl ? 'flex' : 'none';
+
+    document.querySelectorAll('.platform-btn').forEach(btn => btn.classList.remove('active'));
+    document.querySelector(`.btn-${platform}`).classList.add('active');
+    input.focus();
+  }
+
+  function getFullUrl() {
+    const input = document.getElementById('urlInput').value.trim();
+    if (!input) return null;
+
+    const config = platformConfig[currentPlatform];
+    if (config.baseUrl) {
+      // Strip the base URL if user pasted a full URL
+      const username = input.replace(config.baseUrl, '').replace(/^\/+/, '');
+      return config.baseUrl + username;
+    }
+    return input;
+  }
+
+  function generateQR() {
+    const url = getFullUrl();
+    if (!url) {
+      alert(currentPlatform === 'custom' ? 'Please enter a URL' : 'Please enter your username');
+      return;
+    }
+
+    try {
+      new URL(url);
+    } catch {
+      alert('Please enter a valid URL (starting with https://)');
+      return;
+    }
+
+    // Clear previous QR
+    const qrContainer = document.getElementById('qrcode');
+    qrContainer.innerHTML = '';
+    qrInstance = null;
+
+    // Hide logo overlay until loaded
+    const logoOverlay = document.getElementById('logoOverlay');
+    const logoImg = document.getElementById('logoImg');
+    logoOverlay.style.display = 'none';
+
+    // Generate QR code (High error correction allows ~30% center coverage)
+    qrInstance = new QRCode(qrContainer, {
+      text: url,
+      width: 256,
+      height: 256,
+      colorDark: '#000000',
+      colorLight: '#ffffff',
+      correctLevel: QRCode.CorrectLevel.H
+    });
+
+    // Fetch the actual website's favicon and overlay it
+    const domain = new URL(url).hostname;
+    const faviconUrl = `https://www.google.com/s2/favicons?domain=${domain}&sz=128`;
+
+    logoImg.onload = function () {
+      logoOverlay.style.display = 'block';
+    };
+    logoImg.onerror = function () {
+      logoOverlay.style.display = 'none';
+    };
+    logoImg.src = faviconUrl;
+
+    // Show result section
+    document.getElementById('resultUrl').textContent = url;
+    const platformNames = { linkedin: 'LinkedIn', instagram: 'Instagram', facebook: 'Facebook', github: 'GitHub', medium: 'Medium', x: 'X (Twitter)', youtube: 'YouTube', custom: 'Website' };
+    document.getElementById('resultTitle').textContent = `${platformNames[currentPlatform]} QR Code`;
+    document.getElementById('resultSection').style.display = 'block';
+    document.getElementById('resultSection').scrollIntoView({ behavior: 'smooth' });
+  }
+
+  function downloadQR() {
+    // Wait for QR canvas to be ready
+    const qrCanvas = document.querySelector('#qrcode canvas');
+    const logoOverlay = document.getElementById('logoOverlay');
+    const logoImg = document.getElementById('logoImg');
+
+    if (!qrCanvas) return;
+
+    // Create a composite canvas for download
+    const padding = 20; // matches #qrcode padding
+    const totalSize = qrCanvas.width + padding * 2;
+    const downloadCanvas = document.createElement('canvas');
+    downloadCanvas.width = totalSize;
+    downloadCanvas.height = totalSize;
+    const ctx = downloadCanvas.getContext('2d');
+
+    // White background
+    ctx.fillStyle = '#ffffff';
+    ctx.fillRect(0, 0, totalSize, totalSize);
+
+    // Draw QR code
+    ctx.drawImage(qrCanvas, padding, padding);
+
+    // Draw logo in center if visible
+    if (logoOverlay.style.display === 'block') {
+      const logoSize = 44;
+      const bgSize = 56;
+      const bgX = (totalSize - bgSize) / 2;
+      const bgY = (totalSize - bgSize) / 2;
+      const logoX = (totalSize - logoSize) / 2;
+      const logoY = (totalSize - logoSize) / 2;
+      const radius = 12;
+
+      // White rounded background
+      ctx.beginPath();
+      ctx.moveTo(bgX + radius, bgY);
+      ctx.lineTo(bgX + bgSize - radius, bgY);
+      ctx.quadraticCurveTo(bgX + bgSize, bgY, bgX + bgSize, bgY + radius);
+      ctx.lineTo(bgX + bgSize, bgY + bgSize - radius);
+      ctx.quadraticCurveTo(bgX + bgSize, bgY + bgSize, bgX + bgSize - radius, bgY + bgSize);
+      ctx.lineTo(bgX + radius, bgY + bgSize);
+      ctx.quadraticCurveTo(bgX, bgY + bgSize, bgX, bgY + bgSize - radius);
+      ctx.lineTo(bgX, bgY + radius);
+      ctx.quadraticCurveTo(bgX, bgY, bgX + radius, bgY);
+      ctx.closePath();
+      ctx.fillStyle = '#ffffff';
+      ctx.fill();
+
+      // Draw the logo (use a temporary image to avoid CORS on canvas)
+      // Since CORS may taint the canvas, we draw it but catch errors on export
+      try {
+        ctx.drawImage(logoImg, logoX, logoY, logoSize, logoSize);
+      } catch (e) {
+        // If CORS blocks drawing, download without logo
+      }
+    }
+
+    try {
+      const a = document.createElement('a');
+      a.href = downloadCanvas.toDataURL('image/png');
+      a.download = `qrcode-${currentPlatform}.png`;
+      a.click();
+    } catch (e) {
+      // If toDataURL fails due to tainted canvas, download QR only
+      const fallback = document.createElement('canvas');
+      fallback.width = totalSize;
+      fallback.height = totalSize;
+      const fCtx = fallback.getContext('2d');
+      fCtx.fillStyle = '#ffffff';
+      fCtx.fillRect(0, 0, totalSize, totalSize);
+      fCtx.drawImage(qrCanvas, padding, padding);
+
+      const a = document.createElement('a');
+      a.href = fallback.toDataURL('image/png');
+      a.download = `qrcode-${currentPlatform}.png`;
+      a.click();
+    }
+  }
+
+  // Allow Enter key to generate
+  document.getElementById('urlInput').addEventListener('keydown', e => {
+    if (e.key === 'Enter') generateQR();
+  });
+</script>
+
+</body>
+</html>
