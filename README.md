@@ -46,6 +46,7 @@ docker build -t qrcodegenerator .
 qrcodegenerator start                # default port 3000
 qrcodegenerator start --port 8080    # custom port
 qrcodegenerator start -p 4000        # short alias
+qrcodegenerator stop                 # stop the running server
 qrcodegenerator --help               # help
 ```
 
@@ -97,6 +98,7 @@ QRcodegenerator/
 - Download QR code as PNG
 - Works on macOS, Windows, and Linux
 - Graceful shutdown with Ctrl+C
+- `qrcodegenerator stop` to cleanly stop the server 
 
 ## Author
 
