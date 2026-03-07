@@ -22,19 +22,19 @@ A CLI-based QR code generator app for social media profiles and custom URLs. Bui
 
 ## Installation
 
-### Option 1: Python (pip)
+### Option 1: Python (pip) Based Installation
 
 ```bash
-git clone https://github.com/yourusername/QRcodegenerator.git
-cd QRcodegenerator
+git clone https://github.com/skmahe1077/QRCode-Generator/
+cd QRCode-Generator
 pip install -e .
 ```
 
-### Option 2: Docker
+### Option 2: Docker Based Installation
 
 ```bash
-git clone https://github.com/yourusername/QRcodegenerator.git
-cd QRcodegenerator
+git clone https://github.com/skmahe1077/QRCode-Generator/
+cd QRCode-Generator
 docker build -t qrcodegenerator .
 ```
 
