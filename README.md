@@ -22,19 +22,19 @@ A CLI-based QR code generator app for social media profiles and custom URLs
 
 ## Installation
 
-### Option 1: Python (pip) Based Installation
+### Option 1: Python (pip)
 
 ```bash
-git clone https://github.com/skmahe1077/QRCode-Generator/
-cd QRCode-Generator
+git clone https://github.com/yourusername/QRcodegenerator.git
+cd QRcodegenerator
 pip install -e .
 ```
 
-### Option 2: Docker Based Installation
+### Option 2: Docker
 
 ```bash
-git clone https://github.com/skmahe1077/QRCode-Generator/
-cd QRCode-Generator
+git clone https://github.com/yourusername/QRcodegenerator.git
+cd QRcodegenerator
 docker build -t qrcodegenerator .
 ```
 
@@ -43,19 +43,19 @@ docker build -t qrcodegenerator .
 ### Python
 
 ```bash
-qrcodegenerator start                # default port 3000
+qrcodegenerator start                # default port 3001
 qrcodegenerator start --port 8080    # custom port
 qrcodegenerator start -p 4000        # short alias
 qrcodegenerator stop                 # stop the running server
 qrcodegenerator --help               # help
 ```
 
-The app will automatically open in your browser at `http://localhost:3000`.
+The app will automatically open in your browser at `http://localhost:3001`.
 
 ### Docker
 
 ```bash
-docker run -p 3000:3000 qrcodegenerator
+docker run -p 3001:3001 qrcodegenerator
 ```
 
 Custom port:
@@ -64,7 +64,7 @@ Custom port:
 docker run -p 8080:8080 qrcodegenerator qrcodegenerator start --port 8080
 ```
 
-Then open `http://localhost:3000` (or your custom port) in your browser.
+Then open `http://localhost:3001` (or your custom port) in your browser.
 
 ## How It Works
 
@@ -95,10 +95,10 @@ QRcodegenerator/
 - Auto-opens browser on start
 - Auto-builds profile URLs from just a username
 - Website favicon overlay on QR codes
-- Download QR code as PNG
+- Download QR code as PNG with logo
 - Works on macOS, Windows, and Linux
 - Graceful shutdown with Ctrl+C
-- `qrcodegenerator stop` to cleanly stop the server 
+- `qrcodegenerator stop` to cleanly stop the server
 
 ## Author
 

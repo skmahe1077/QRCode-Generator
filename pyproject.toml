@@ -8,7 +8,7 @@ version = "1.0.0"
 description = "QR Code Generator - Generate QR codes for social profiles and websites"
 license = "MIT"
 requires-python = ">=3.8"
-dependencies = ["flask"]
+dependencies = ["flask", "requests"]
 
 [tool.setuptools.packages.find]
 include = ["qrcodegenerator*"]

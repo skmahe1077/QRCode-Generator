@@ -133,7 +133,7 @@
       transition: border-color 0.2s;
     }
 
-    .url-row .url-prefix + input {
+    .url-row .url-prefix[style*="flex"] + input {
       border-radius: 0 12px 12px 0;
       border-left: none;
     }
@@ -192,7 +192,7 @@
       border-radius: 16px;
     }
 
-    #qrcode img, #qrcode canvas { display: block; }
+    #qrcode img, #qrcode canvas { display: block; width: 256px; height: 256px; }
 
     .logo-overlay {
       position: absolute;
@@ -405,16 +405,16 @@
     // Generate QR code (High error correction allows ~30% center coverage)
     qrInstance = new QRCode(qrContainer, {
       text: url,
-      width: 256,
-      height: 256,
+      width: 512,
+      height: 512,
       colorDark: '#000000',
       colorLight: '#ffffff',
       correctLevel: QRCode.CorrectLevel.H
     });
 
-    // Fetch the actual website's favicon and overlay it
+    // Fetch favicon via local proxy to avoid CORS canvas tainting
     const domain = new URL(url).hostname;
-    const faviconUrl = `https://www.google.com/s2/favicons?domain=${domain}&sz=128`;
+    const faviconUrl = `/favicon-proxy?domain=${encodeURIComponent(domain)}&sz=256`;
 
     logoImg.onload = function () {
       logoOverlay.style.display = 'block';
