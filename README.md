@@ -1,6 +1,6 @@
 # QR Code Generator
 
-A CLI-based QR code generator app for social media profiles and custom URLs. Built with Python and Flask.
+A CLI-based QR code generator app for social media profiles and custom URLs
 
 ## Supported Platforms
 
