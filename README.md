@@ -33,7 +33,7 @@ pip install -e .
 ### Option 2: Docker
 
 ```bash
-git clone https://github.com/yourusername/QRcodegenerator.git
+git clone https://github.com/skmahe1077/QRCode-Generator/
 cd QRcodegenerator
 docker build -t qrcodegenerator .
 ```
